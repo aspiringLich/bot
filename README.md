@@ -1,0 +1,3 @@
+# bot
+
+Funny discord bot.
