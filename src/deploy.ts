@@ -43,7 +43,7 @@ export function getCommands(): Command[] {
     return commands;
 }
 
-export async function deployCommands(commands: Command[]) {
+export async function deployCommands(commands: Command[], global: boolean) {
     // Construct and prepare an instance of the REST module
     const rest = new REST().setToken(token);
 
@@ -56,7 +56,7 @@ export async function deployCommands(commands: Command[]) {
             const commandsData = commands.map((command) => command.data.toJSON());
 
             let data: any;
-            if (process.argv.includes("--global")) {
+            if (global) {
                 // The put method is used to fully refresh all commands
                 data = await rest.put(Routes.applicationCommands(clientID), {
                     body: commandsData,

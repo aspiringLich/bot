@@ -1,5 +1,3 @@
-import fs from "node:fs";
-import path from "node:path";
 import {
     Client as _Client,
     Collection,
@@ -7,22 +5,27 @@ import {
     GatewayIntentBits,
 } from "discord.js";
 import { token } from "../config.json";
-import { Command, CommandExecutor } from "./types";
 import { deployCommands, getCommands } from "./deploy";
 
 interface Client extends _Client {
     commands?: Collection<string, any>;
 }
-
 const client: Client = new _Client({ intents: [GatewayIntentBits.Guilds] });
+
+const commands = getCommands();
+if (process.argv.includes("--deploy")) {
+    deployCommands(commands, false);
+}
+
+if (process.argv.includes("--deploy-global")) {
+    deployCommands(commands, true);
+}
 
 client.commands = new Collection();
 
-const commands = getCommands();
 for (const command of commands) {
     client.commands.set(command.data.name, command.execute);
 }
-deployCommands(commands);
 
 client.on(Events.InteractionCreate, async (interaction: any) => {
     const command = interaction.client.commands.get(interaction.commandName);
@@ -38,12 +41,16 @@ client.on(Events.InteractionCreate, async (interaction: any) => {
         await command(interaction);
     } catch (error) {
         console.error(error);
-        
+
         // intentional error
         if (error instanceof Error) {
             let e = error as Error;
             e.message = `Error executing command ${interaction.commandName}: ${e.message}`;
-        } 
+            await interaction.followUp({
+                content: `There was an error while executing this command: ${e.message}`,
+                ephemeral: true,
+            });
+        }
         // unintentional error
         else {
             if (interaction.replied || interaction.deferred) {
@@ -59,6 +66,10 @@ client.on(Events.InteractionCreate, async (interaction: any) => {
             }
         }
     }
+});
+
+client.once(Events.ClientReady, (c) => {
+    console.log(`Ready! Logged in as ${c.user.tag}`);
 });
 
 client.login(token);
