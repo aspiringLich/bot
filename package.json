@@ -3,9 +3,7 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-        "build": "tsc --project tsconfig.json",
-        "watch": "tsc --watch --project tsconfig.json",
-        "start": "ts-node index.ts"
+        "start": "ts-node src/index.ts"
     },
     "dependencies": {
         "discord.js": "^14.11.0",
