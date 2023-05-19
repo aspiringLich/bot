@@ -1,16 +1,14 @@
 {
-  "name": "bot",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "run": "node index.ts"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "discord.js": "^14.11.0",
-    "typescript": "^5.0.4"
-  }
+    "name": "bot",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "build": "tsc --project tsconfig.json",
+        "watch": "tsc --watch --project tsconfig.json",
+        "start": "ts-node index.ts"
+    },
+    "dependencies": {
+        "discord.js": "^14.11.0",
+        "typescript": "^5.0.4"
+    }
 }
