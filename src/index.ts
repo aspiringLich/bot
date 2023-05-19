@@ -10,66 +10,77 @@ import { deployCommands, getCommands } from "./deploy";
 interface Client extends _Client {
     commands?: Collection<string, any>;
 }
-const client: Client = new _Client({ intents: [GatewayIntentBits.Guilds] });
 
-const commands = getCommands();
-if (process.argv.includes("--deploy")) {
-    deployCommands(commands, false);
-}
+export function main() {
+    const client: Client = new _Client({ intents: [GatewayIntentBits.Guilds] });
 
-if (process.argv.includes("--deploy-global")) {
-    deployCommands(commands, true);
-}
-
-client.commands = new Collection();
-
-for (const command of commands) {
-    client.commands.set(command.data.name, command.execute);
-}
-
-client.on(Events.InteractionCreate, async (interaction: any) => {
-    const command = interaction.client.commands.get(interaction.commandName);
-
-    if (!command) {
-        console.error(
-            `No command matching ${interaction.commandName} was found.`
-        );
+    const commands = getCommands();
+    if (process.argv.includes("--deploy")) {
+        deployCommands(commands, false);
         return;
     }
 
-    try {
-        await command(interaction);
-    } catch (error) {
-        console.error(error);
+    if (process.argv.includes("--deploy-global")) {
+        deployCommands(commands, true);
+        return;
+    }
 
-        // intentional error
-        if (error instanceof Error) {
-            let e = error as Error;
-            e.message = `Error executing command ${interaction.commandName}: ${e.message}`;
-            await interaction.followUp({
-                content: `There was an error while executing this command: ${e.message}`,
-                ephemeral: true,
-            });
+    client.commands = new Collection();
+
+    for (const command of commands) {
+        client.commands.set(command.data.name, command.execute);
+    }
+
+    client.on(Events.InteractionCreate, async (interaction: any) => {
+        const command = interaction.client.commands.get(
+            interaction.commandName
+        );
+
+        if (!command) {
+            console.error(
+                `No command matching ${interaction.commandName} was found.`
+            );
+            return;
         }
-        // unintentional error
-        else {
-            if (interaction.replied || interaction.deferred) {
+
+        try {
+            await command(interaction);
+        } catch (error) {
+            console.error(error);
+
+            // intentional error
+            if (error instanceof Error) {
+                let e = error as Error;
+                e.message = `Error executing command ${interaction.commandName}: ${e.message}`;
                 await interaction.followUp({
-                    content: "There was an error while executing this command!",
-                    ephemeral: true,
-                });
-            } else {
-                await interaction.reply({
-                    content: "There was an error while executing this command!",
+                    content: e.message,
                     ephemeral: true,
                 });
             }
+            // unintentional error
+            else {
+                if (interaction.replied || interaction.deferred) {
+                    await interaction.followUp({
+                        content:
+                            "There was an error while executing this command!",
+                        ephemeral: true,
+                    });
+                } else {
+                    await interaction.reply({
+                        content:
+                            "There was an error while executing this command!",
+                        ephemeral: true,
+                    });
+                }
+            }
         }
-    }
-});
+    });
 
-client.once(Events.ClientReady, (c) => {
-    console.log(`Ready! Logged in as ${c.user.tag}`);
-});
+    client.once(Events.ClientReady, (c) => {
+        console.log(`Ready! Logged in as ${c.user.tag}`);
+    });
 
-client.login(token);
+    client.login(token);
+}
+
+main();

@@ -3,9 +3,12 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-        "start": "ts-node src/index.ts"
+        "start": "ts-node src/index.ts",
+        "watch": "nodemon src/index.ts"
     },
-    "dependencies": {
+    "devDependencies": {
+        "nodemon": "^2.0.22",
+        "ts-node": "^10.9.1",
         "discord.js": "^14.11.0",
         "jsdom": "^22.0.0",
         "typescript": "^5.0.4"

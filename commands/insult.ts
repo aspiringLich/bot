@@ -29,6 +29,6 @@ export async function execute(interaction: CommandInteraction) {
     }
 
     await interaction.reply({
-        content: `${user} ${text}`,
+        content: `${user} ${text.replace("*", "\*")}`,
     });
 }
